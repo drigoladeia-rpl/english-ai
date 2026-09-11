@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>English AI — Teste de Microfone</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f3f6fb;font-family:system-ui,-apple-system,sans-serif;color:#10213f}
+.app{max-width:430px;margin:auto;min-height:100vh;padding-bottom:30px}
+header{background:linear-gradient(135deg,#1261f5,#4d8cff);color:#fff;padding:22px 18px 25px;border-radius:0 0 28px 28px}
+.logo{font-weight:800;font-size:20px}.tag{float:right;background:#ffffff30;padding:7px 10px;border-radius:15px;font-size:12px}
+h1{font-size:27px;margin:24px 0 5px}.sub{font-size:14px;opacity:.92}.bar{height:8px;background:#ffffff35;border-radius:10px;margin-top:17px}.bar i{display:block;height:100%;width:25%;background:#fff;border-radius:10px}
+main{padding:17px}.card{background:#fff;border-radius:21px;padding:18px;margin-bottom:13px;box-shadow:0 8px 25px #17345b10}
+.small{font-size:12px;color:#1769ff;font-weight:800;text-transform:uppercase;letter-spacing:.08em}.title{font-size:22px;font-weight:800;margin:6px 0}
+.muted{font-size:13px;color:#71809a;line-height:1.5}button{border:0;border-radius:15px;padding:14px 16px;font-weight:800;font-size:14px;cursor:pointer}.primary{background:#1769ff;color:#fff}.secondary{background:#edf3ff;color:#1559d5}.wide{width:100%}
+.status{padding:13px;border-radius:15px;background:#fff7df;color:#725b13;font-size:13px}.status.ok{background:#e8f8f1;color:#087b53}.status.err{background:#fff0ef;color:#c43a30}
+.mic{width:84px;height:84px;border-radius:50%;display:block;margin:17px auto;font-size:32px;background:#eaf1ff;color:#1769ff}.mic.on{background:#ffe8e5;color:#d33;animation:pulse 1s infinite}
+@keyframes pulse{50%{transform:scale(1.06)}}.phrase{font-size:22px;font-weight:850;margin:12px 0}.score{text-align:center;font-size:40px;font-weight:900}.meter{height:12px;background:#e8edf5;border-radius:10px;overflow:hidden}.meter i{display:block;height:100%;width:0;background:#19a974;transition:.3s}
+#heard{text-align:center;margin:10px 0;color:#52637c}ol{padding-left:20px;font-size:13px;color:#52637c;line-height:1.7}
+</style>
+</head>
+<body><div class="app">
+<header><span class="logo">✨ English AI</span><span class="tag">TESTE</span>
+<h1>Viva o Inglês</h1><div class="sub">Primeiro vamos liberar o microfone.</div><div class="bar"><i></i></div></header>
+<main>
+<div class="card"><div class="small">1 • Permissão</div><div class="title">🎤 Ativar microfone</div>
+<p class="muted">Toque no botão abaixo. Em uma página HTTPS, o Chrome deverá mostrar a pergunta para permitir o microfone.</p>
+<button class="primary wide" id="activate" onclick="activateMic()">🎤 ATIVAR MICROFONE</button>
+<div id="status" class="status" style="margin-top:12px">Aguardando permissão...</div></div>
+
+<div class="card"><div class="small">2 • Frase completa</div><div class="phrase">I want a sandwich.</div><div class="muted">Eu quero um sanduíche.</div>
+<button class="secondary wide" onclick="speak()">🔊 Ouvir frase</button></div>
+
+<div class="card"><div class="small">3 • Pronúncia + contexto</div>
+<p class="muted">Para avançar, a resposta precisa atingir <b>85%</b>. A avaliação considera a <b>frase completa</b>, não apenas uma palavra.</p>
+<button class="mic" id="mic" onclick="startSpeech()">🎤</button>
+<div id="heard">Microfone ainda não iniciado.</div><div class="score" id="score">—</div>
+<div class="meter"><i id="meter"></i></div><div id="feedback" class="muted" style="text-align:center;margin-top:10px"></div>
+</div>
+
+<div class="card"><div class="small">Se não aparecer a permissão</div>
+<ol><li>Abra esta página pelo Chrome, não pelo visualizador do RAR.</li>
+<li>A página precisa estar em <b>HTTPS</b> para o microfone funcionar de forma confiável.</li>
+<li>No Android, confira Chrome → Configurações → Configurações do site → Microfone.</li></ol></div>
+</main></div>
+
+<script>
+let stream=null,recognition=null;
+const expected="I want a sandwich.";
+function setStatus(t,c=""){let e=document.getElementById("status");e.textContent=t;e.className="status "+c}
+async function activateMic(){
+ try{
+   if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){
+     setStatus("Este endereço não permite acesso ao microfone. Abra em uma página HTTPS no Chrome.","err");return;
+   }
+   stream=await navigator.mediaDevices.getUserMedia({audio:true});
+   setStatus("✅ Microfone autorizado! Agora toque no 🎤 abaixo e fale a frase.","ok");
+   document.getElementById("activate").textContent="✅ MICROFONE ATIVO";
+ }catch(e){
+   setStatus("Permissão recusada ou bloqueada: "+e.name+". Verifique a permissão do Chrome.","err");
+ }
+}
+function speak(){
+ if(!("speechSynthesis" in window)){alert("Áudio não disponível.");return}
+ speechSynthesis.cancel();let u=new SpeechSynthesisUtterance(expected);u.lang="en-US";u.rate=.88;speechSynthesis.speak(u)
+}
+function norm(s){return s.toLowerCase().normalize("NFD").replace(/[\\u0300-\\u036f]/g,"").replace(/[^a-z0-9 ]/g," ").replace(/\\s+/g," ").trim()}
+function fullScore(expected,heard){
+ const A=norm(expected).split(" "),B=norm(heard).split(" ");
+ let used=new Set(),hits=0;
+ A.forEach((w)=>{let i=B.findIndex((x,j)=>x===w&&!used.has(j));if(i>=0){hits++;used.add(i)}});
+ let missing=A.length-hits, extra=Math.max(0,B.length-A.length);
+ return Math.max(0,Math.round((hits/A.length)*100-extra*4-missing*2));
+}
+function startSpeech(){
+ if(!stream){setStatus("Primeiro toque em “ATIVAR MICROFONE”.","err");return}
+ const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+ if(!SR){setStatus("Seu navegador não oferece reconhecimento de voz. Use Chrome no Android.","err");return}
+ if(recognition){recognition.stop();recognition=null;return}
+ const b=document.getElementById("mic");b.classList.add("on");document.getElementById("heard").textContent="🎧 Ouvindo...";
+ recognition=new SR();recognition.lang="en-US";recognition.interimResults=false;recognition.maxAlternatives=1;
+ recognition.onresult=e=>{
+   const heard=e.results[0][0].transcript,s=fullScore(expected,heard);
+   document.getElementById("heard").textContent="Você disse: "+heard;
+   document.getElementById("score").textContent=s+"%";document.getElementById("meter").style.width=s+"%";
+   document.getElementById("feedback").textContent=s>=85?"🎉 85% atingidos! Próxima etapa liberada.":"🔄 Ainda não chegou a 85%. Ouça novamente e repita a frase completa.";
+   document.getElementById("feedback").style.color=s>=85?"#087b53":"#d33";
+ };
+ recognition.onerror=e=>{setStatus("Reconhecimento de voz: "+e.error+".","err");b.classList.remove("on")};
+ recognition.onend=()=>{b.classList.remove("on");recognition=null};
+ recognition.start();
+}
+</script></body></html>
