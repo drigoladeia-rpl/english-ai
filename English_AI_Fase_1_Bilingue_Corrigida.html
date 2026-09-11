@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0757b8">
+<title>English AI — Fase 1</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#f7fbff;color:#123d82}
+button,input{font:inherit}button{border:0;cursor:pointer}
+.header{background:linear-gradient(145deg,#124889,#0877dc);color:white;padding:28px 20px 42px;border-radius:0 0 28px 28px}
+.top{display:flex;align-items:center;gap:14px}.back{font-size:38px;background:none;color:#fff}.title{font-size:28px;font-weight:800}.sub{font-size:16px;margin-top:5px}
+.card{background:white;margin:-22px 16px 16px;border-radius:24px;box-shadow:0 5px 20px #0b5bb51c;padding:18px;border:1px solid #d9eaff}
+.progressrow{display:flex;align-items:center;gap:14px}.cap{font-size:34px}.bar{height:12px;background:#dbeafb;border-radius:20px;overflow:hidden;flex:1}.fill{height:100%;background:#0789f9;border-radius:20px}.pct{font-weight:800}
+.screen{display:none;padding-bottom:90px}.screen.active{display:block}.section{padding:0 16px}.robot{font-size:44px}.bubble{background:#eaf4ff;border-radius:20px;padding:16px;margin:12px 0;font-size:18px;line-height:1.45}
+.btn{background:#087df0;color:#fff;border-radius:30px;padding:13px 20px;font-weight:700;margin:5px 4px 5px 0}.btn.secondary{background:#e9f3ff;color:#0757b8}.btn.green{background:#19a56a}.btn.warn{background:#ef8d00}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.lesson{background:white;border:1px solid #d7e8fa;border-radius:20px;padding:16px;box-shadow:0 4px 14px #0b5bb50e}.lesson h3{margin:8px 0}.icon{font-size:34px}.small{font-size:14px;color:#5e78a2}.locked{opacity:.55}
+.words{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.word{background:#eef7ff;border-radius:16px;padding:13px}.word b{display:block;font-size:19px}.speak{float:right;background:#1684ee;color:white;border-radius:50%;width:38px;height:38px}
+.task{background:white;border:1px solid #cce3fb;border-radius:20px;padding:17px;margin:12px 0}.target{font-size:23px;font-weight:800;color:#06449b;margin:10px 0}.score{font-size:22px;font-weight:800;margin:10px 0}.ok{color:#078c59}.bad{color:#d44832}.status{padding:10px;border-radius:12px;background:#f0f7ff;margin-top:8px}
+.option{display:block;width:100%;text-align:left;background:#f1f7ff;border:1px solid #cfe2f7;color:#123d82;padding:13px;border-radius:14px;margin:8px 0}.option.correct{background:#dff8eb}.option.wrong{background:#ffe5e1}
+.chat{min-height:250px}.msg{max-width:88%;padding:13px 15px;border-radius:18px;margin:9px 0;line-height:1.4}.ai{background:#eaf4ff}.me{background:#087df0;color:white;margin-left:auto}.inputrow{display:flex;gap:8px;position:sticky;bottom:60px;background:#fff;padding:10px 0}.inputrow input{flex:1;border:1px solid #cce1f8;border-radius:28px;padding:13px 16px;min-width:0}.mic{width:54px;height:54px;border-radius:50%;background:#087df0;color:white;font-size:23px}
+.nav{position:fixed;bottom:0;left:0;right:0;background:white;border-top:1px solid #d8e7f7;display:flex;justify-content:space-around;padding:8px 4px;z-index:5}.nav button{background:none;color:#5a739d;font-size:12px}.nav b{display:block;font-size:25px}.nav .on{color:#087df0}
+.result{text-align:center;padding:25px}.big{font-size:60px}.hide{display:none}
+@media(min-width:700px){body{max-width:700px;margin:auto}.nav{max-width:700px;margin:auto}.grid{grid-template-columns:repeat(3,1fr)}}
+</style>
+</head>
+<body>
+<header class="header">
+ <div class="top"><button class="back" onclick="goHome()">‹</button><div><div class="title">Conversar com IA</div><div class="sub">Pratique inglês de forma natural!</div></div></div>
+</header>
+
+<div class="card">
+ <div class="progressrow"><div class="cap">🎓</div><div style="flex:1"><b>Nível A1 — Fase 1</b><div class="bar"><div id="progress" class="fill" style="width:0%"></div></div></div><div id="pct" class="pct">0%</div></div>
+</div>
+
+<main>
+<section id="home" class="screen active section">
+ <div class="bubble"><span class="robot">🤖</span><br><b>Olá! Vamos começar a Fase 1.</b><br>Você vai aprender, ouvir, falar, responder e participar de situações reais em inglês.</div>
+ <div class="lesson"><h3>🎯 Meta da fase</h3><p>Conseguir cumprimentar, se apresentar, falar o básico do dia a dia e pedir algo em um restaurante.</p><p><b>Regra:</b> para avançar nas tarefas de fala, você precisa atingir <b>85%</b>.</p></div>
+ <h3>📚 Fase 1</h3><div id="lessonGrid" class="grid"></div>
+ <button class="btn" onclick="openLesson(0)">▶ Começar / continuar</button>
+ <button class="btn secondary" onclick="openScreen('conversation')">🗣️ Viva o Inglês</button>
+ <button class="btn secondary" onclick="resetAll()">↻ Reiniciar progresso</button>
+</section>
+
+<section id="lesson" class="screen section">
+ <div id="lessonContent"></div>
+</section>
+
+<section id="conversation" class="screen section">
+ <h2>🗣️ Viva o Inglês</h2>
+ <div class="lesson"><b>Escolha uma situação</b><div id="scenarios" class="grid"></div></div>
+ <div id="chat" class="chat"></div>
+ <div class="inputrow"><input id="chatInput" placeholder="Digite sua mensagem em inglês..."><button class="mic" onclick="chatMic()">🎤</button><button class="mic" onclick="sendChat()">➤</button></div>
+</section>
+
+<section id="final" class="screen section">
+ <div class="result"><div class="big">🏆</div><h2>Teste final da Fase 1</h2><p>Mostre o que você aprendeu. A fase será concluída quando você passar pelas tarefas.</p></div>
+ <div id="finalTask" class="task"></div>
+</section>
+</main>
+
+<nav class="nav">
+ <button class="on" onclick="openScreen('home')"><b>⌂</b>Início</button>
+ <button onclick="openLesson(0)"><b>▱</b>Curso</button>
+ <button onclick="openScreen('conversation')"><b>☷</b>Conversar</button>
+ <button onclick="openScreen('final')"><b>✓</b>Exercícios</button>
+</nav>
+
+<script>
+const lessons=[
+ {title:"Saudações e apresentação",icon:"👋",words:[["Hello","Olá","👋"],["Hi","Oi","🙂"],["My name is...","Meu nome é...","🙋"],["I am a student.","Eu sou estudante.","🎓"],["Nice to meet you.","Prazer em conhecer você.","🤝"]],tasks:[["Diga em inglês: Olá","Hello"],["Diga em inglês: Meu nome é Rodrigo","My name is Rodrigo"],["Diga em inglês: Eu sou estudante","I am a student"]]},
+ {title:"Rotina e necessidades",icon:"🏠",words:[["I eat","Eu como","🍽️"],["I drink","Eu bebo","🥤"],["I want","Eu quero","🙋"],["Water","Água","💧"],["Sandwich","Sanduíche","🥪"]],tasks:[["Diga em inglês: Eu quero água","I want water"],["Diga em inglês: Eu como um sanduíche","I eat a sandwich"],["Diga em inglês: Eu quero um sanduíche","I want a sandwich"]]},
+ {title:"Restaurante",icon:"🍽️",words:[["Restaurant","Restaurante","🍽️"],["Menu","Cardápio","📖"],["I would like...","Eu gostaria de...","🙋"],["Please","Por favor","🙏"],["Thank you","Obrigado","😊"]],tasks:[["Diga em inglês: Eu gostaria de um café","I would like a coffee"],["Diga em inglês: O cardápio, por favor","The menu, please"],["Diga em inglês: Obrigado","Thank you"]]},
+ {title:"Conversa do dia a dia",icon:"💬",words:[["How are you?","Como você está?","🙂"],["I am fine.","Eu estou bem.","👍"],["What do you do?","O que você faz?","❓"],["I work.","Eu trabalho.","💼"],["See you later.","Até mais.","👋"]],tasks:[["Diga em inglês: Como você está?","How are you?"],["Diga em inglês: Eu estou bem","I am fine"],["Diga em inglês: Até mais","See you later"]]}
+];
+let state=JSON.parse(localStorage.getItem("englishAI_fase1")||'{"lesson":0,"done":{},"final":0}');
+let currentTask=null,recognition=null,recognizing=false;
+
+function save(){localStorage.setItem("englishAI_fase1",JSON.stringify(state));renderHome()}
+function completedCount(){return Object.values(state.done).filter(Boolean).length}
+function totalTasks(){return lessons.reduce((n,l)=>n+l.tasks.length,0)}
+function progress(){return Math.round(completedCount()/totalTasks()*100)}
+function renderHome(){
+ document.getElementById("progress").style.width=progress()+"%";document.getElementById("pct").textContent=progress()+"%";
+ const g=document.getElementById("lessonGrid");g.innerHTML="";
+ lessons.forEach((l,i)=>{let unlocked=i===0||Object.keys(state.done).filter(k=>k.startsWith((i-1)+"-")).length===lessons[i-1].tasks.length;
+ let done= l.tasks.every((_,j)=>state.done[i+"-"+j]);
+ g.innerHTML+=`<div class="lesson ${unlocked?'':'locked'}"><div class="icon">${l.icon}</div><h3>Fase 1.${i+1}</h3><b>${l.title}</b><p class="small">${done?'✅ Concluída':unlocked?'🔓 Liberada':'🔒 Bloqueada'}</p><button class="btn ${unlocked?'':'secondary'}" ${unlocked?'':'disabled'} onclick="openLesson(${i})">${done?'Revisar':'Abrir'}</button></div>`});
+}
+function openScreen(id){document.querySelectorAll(".screen").forEach(x=>x.classList.remove("active"));document.getElementById(id).classList.add("active");if(id==="conversation")initScenarios();if(id==="final")renderFinal();scrollTo(0,0)}
+function goHome(){openScreen("home")}
+function openLesson(i){
+ const l=lessons[i];let unlocked=i===0||lessons[i-1].tasks.every((_,j)=>state.done[(i-1)+"-"+j]);
+ if(!unlocked){alert("Complete a fase anterior primeiro.");return}
+ state.lesson=i;save();openScreen("lesson");
+ let words=l.words.map((w,wi)=>`<div class="word"><b>${w[2]} ${w[0]}</b><span>${w[1]}</span><div style="margin-top:8px"><button class="btn secondary" style="padding:8px 12px" onclick="speak(${JSON.stringify(w[0])},'en-US')">🔊 English</button><button class="btn secondary" style="padding:8px 12px" onclick="speak(${JSON.stringify(w[1])},'pt-BR')">🔊 Português</button></div></div>`).join("");
+ let tasks=l.tasks.map((t,j)=>taskHTML(i,j,t)).join("");
+ document.getElementById("lessonContent").innerHTML=`<h2>${l.icon} Fase 1.${i+1}: ${l.title}</h2><div class="bubble">🤖 <b>Professor IA:</b> Aprenda as palavras, ouça e depois fale. Você precisa de <b>85%</b> para concluir cada fala.</div><h3>🧠 Palavras com memória visual</h3><div class="words">${words}</div><h3>🎤 Tarefas de fala</h3>${tasks}`;
+}
+function taskHTML(i,j,t){
+ const key=i+"-"+j,done=!!state.done[key];
+ return `<div class="task"><b>Tarefa ${j+1}</b><p>${t[0]}</p><div class="target">🔊 ${t[1]}</div><button class="btn secondary" onclick="speak(${JSON.stringify(t[1])})">🔊 Ouvir</button><button class="btn" onclick="startSpeak(${i},${j})">🎤 Falar agora</button><div id="status-${i}-${j}" class="status">${done?'✅ Aprovada — 85%+':'Toque em Falar agora e repita a frase.'}</div></div>`;
+}
+function normalize(s){return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^\w\s]/g," ").replace(/\s+/g," ").trim()}
+function scoreSpeech(expected,spoken){
+ const a=normalize(expected).split(" "),b=normalize(spoken).split(" ");let hit=0;
+ b.forEach(x=>{if(a.includes(x))hit++});let wordScore=Math.round(hit/a.length*100);
+ if(normalize(expected)===normalize(spoken))return 100;
+ return Math.min(100,Math.round(wordScore*.8+(spoken.length>=expected.length*.75?20:0)));
+}
+async function requestMic(){
+ if(!navigator.mediaDevices?.getUserMedia){throw new Error("Seu navegador não oferece acesso ao microfone.");}
+ const stream=await navigator.mediaDevices.getUserMedia({audio:true});
+ stream.getTracks().forEach(t=>t.stop()); // libera o microfone antes do SpeechRecognition
+}
+async function startSpeak(i,j){
+ const el=document.getElementById(`status-${i}-${j}`);el.innerHTML="⏳ Preparando microfone...";
+ try{await requestMic()}catch(e){el.innerHTML="❌ Permissão do microfone não liberada. Abra o site por HTTPS e permita o microfone.";return}
+ const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+ if(!SR){el.innerHTML="❌ Reconhecimento de voz não disponível neste navegador. Use Chrome no Android.";return}
+ currentTask={i,j,expected:lessons[i].tasks[j][1]};
+ recognition=new SR();recognition.lang="en-US";recognition.interimResults=false;recognition.continuous=false;recognition.maxAlternatives=1;
+ recognition.onstart=()=>{recognizing=true;el.innerHTML="🎤 <b>Estou ouvindo...</b> Fale agora."}
+ recognition.onresult=e=>{const text=e.results[0][0].transcript;const s=scoreSpeech(currentTask.expected,text);el.innerHTML=`🗣️ Você falou: <b>${text}</b><br><span class="score ${s>=85?'ok':'bad'}">${s}%</span> ${s>=85?'— ✅ Muito bem! Tarefa liberada.':'— ❌ Ainda não. Tente novamente.'}`;if(s>=85){state.done[i+"-"+j]=true;save();setTimeout(()=>openLesson(i),700)}}
+ recognition.onerror=e=>{let m={ "not-allowed":"Permissão negada. Toque no ícone de cadeado/permissões do site e permita o microfone.","no-speech":"Não ouvi sua voz. Fale mais perto do microfone e tente novamente.","network":"O reconhecimento de voz precisa de conexão com a internet.","aborted":"Reconhecimento interrompido."}[e.error]||("Erro: "+e.error);el.innerHTML="❌ "+m}
+ recognition.onend=()=>{recognizing=false}
+ try{setTimeout(()=>{try{recognition.start()}catch(e){el.innerHTML="❌ Toque novamente em Falar agora."}},150)}catch(e){el.innerHTML="❌ Não foi possível iniciar o microfone."}
+}
+let voiceCache={en:null,pt:null};
+function loadVoices(){if(!('speechSynthesis'in window))return;const v=speechSynthesis.getVoices();voiceCache.en=v.find(x=>/^en-US$/i.test(x.lang))||v.find(x=>/^en/i.test(x.lang))||null;voiceCache.pt=v.find(x=>/^pt-BR$/i.test(x.lang))||v.find(x=>/^pt/i.test(x.lang))||null;}
+if('speechSynthesis'in window){loadVoices();speechSynthesis.onvoiceschanged=loadVoices;}
+function speak(text,lang='en-US'){if(!('speechSynthesis'in window)){alert('O áudio de voz não está disponível neste navegador.');return}loadVoices();speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang=lang;u.rate=lang.startsWith('pt')?.92:.86;const v=lang.startsWith('pt')?voiceCache.pt:voiceCache.en;if(v)u.voice=v;speechSynthesis.speak(u);}
+function initScenarios(){
+ const box=document.getElementById("scenarios");box.innerHTML=["🍽️ Restaurante","🛒 Supermercado","✈️ Aeroporto","🏨 Hotel","☕ Café","🚕 Táxi"].map((x,i)=>`<button class="btn secondary" onclick="scenario(${i})">${x}</button>`).join("");
+}
+const scen=[
+ ["Restaurante","Welcome! What would you like to order?","Exemplo: I would like a sandwich, please."],
+ ["Supermercado","Hello! Can I help you find something?","Exemplo: I want water, please."],
+ ["Aeroporto","Hello! Where are you going today?","Exemplo: I am going to São Paulo."],
+ ["Hotel","Welcome! Do you have a reservation?","Exemplo: Yes, I have a reservation."],
+ ["Café","Hi! What would you like to drink?","Exemplo: I would like a coffee, please."],
+ ["Táxi","Hello! Where would you like to go?","Exemplo: I want to go to the hotel."]
+];
+function scenario(i){document.getElementById("chat").innerHTML=`<div class="msg ai">🤖 <b>${scen[i][0]}</b><br>${scen[i][1]}<br><small>${scen[i][2]}</small><br><button class="btn secondary" onclick="speak(${JSON.stringify(scen[i][1])})">🔊 Ouvir</button></div>`}
+function sendChat(){let inp=document.getElementById("chatInput"),v=inp.value.trim();if(!v)return;document.getElementById("chat").innerHTML+=`<div class="msg me">${v}</div>`;inp.value="";let reply="Good! Now try to say that in English. 🎤";if(/hello|hi|good/i.test(v))reply="Hello! Nice to meet you. How are you?";else if(/sandwich|water|coffee|want|would like/i.test(v))reply="Excellent! Please continue. What else would you like?";document.getElementById("chat").innerHTML+=`<div class="msg ai">🤖 ${reply}<br><button class="btn secondary" onclick="speak(${JSON.stringify(reply)})">🔊 Ouvir</button></div>`}
+async function chatMic(){try{await requestMic()}catch(e){alert("Permita o microfone no site HTTPS.");return}const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){alert("Use Chrome no Android.");return}let r=new SR();r.lang="en-US";r.interimResults=false;r.onresult=e=>{document.getElementById("chatInput").value=e.results[0][0].transcript};r.onerror=e=>alert("Microfone: "+e.error);r.start()}
+function renderFinal(){
+ const done=completedCount(),total=totalTasks();
+ if(done<total){document.getElementById("finalTask").innerHTML=`<h3>🔒 Teste final bloqueado</h3><p>Complete todas as tarefas das 4 aulas. Progresso: <b>${done}/${total}</b>.</p><button class="btn" onclick="openLesson(state.lesson)">Continuar curso</button>`;return}
+ let n=state.final||0;let qs=[["Como dizer “Olá, meu nome é...” em inglês?","Hello, my name is..."],["Como pedir um sanduíche?","I would like a sandwich, please."],["Como dizer “Eu estou bem”?","I am fine."]];
+ if(n>=qs.length){document.getElementById("finalTask").innerHTML=`<div class="result"><div class="big">🎉</div><h2>Fase 1 concluída!</h2><p>Você passou pela primeira fase completa.</p><p>Agora a próxima etapa pode ser liberada.</p></div>`;return}
+ let q=qs[n];document.getElementById("finalTask").innerHTML=`<b>Questão ${n+1} de ${qs.length}</b><p>${q[0]}</p><div class="target">${q[1]}</div><button class="btn secondary" onclick="speak(${JSON.stringify(q[0])},'pt-BR')">🔊 Ouvir PT</button><button class="btn secondary" onclick="speak(${JSON.stringify(q[1])},'en-US')">🔊 Ouvir EN</button><button class="btn" onclick="finalSpeak()">🎤 Responder</button><div id="finalStatus" class="status">Meta: 85%</div>`;
+}
+async function finalSpeak(){try{await requestMic()}catch(e){document.getElementById("finalStatus").textContent="❌ Libere o microfone nas permissões do site.";return}let SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR)return;let qs=[["Hello, my name is..."],["I would like a sandwich, please."],["I am fine."]],exp=qs[state.final][0],r=new SR();r.lang="en-US";r.interimResults=false;r.onstart=()=>document.getElementById("finalStatus").textContent="🎤 Fale agora...";r.onresult=e=>{let t=e.results[0][0].transcript,s=scoreSpeech(exp,t);document.getElementById("finalStatus").innerHTML=`Você falou: <b>${t}</b><br><span class="score ${s>=85?'ok':'bad'}">${s}%</span>`;if(s>=85){state.final++;save();setTimeout(renderFinal,700)}};r.onerror=e=>document.getElementById("finalStatus").textContent="❌ "+e.error;r.start()}
+function resetAll(){if(confirm("Reiniciar todo o progresso?")){localStorage.removeItem("englishAI_fase1");state={lesson:0,done:{},final:0};renderHome();openScreen("home")}}
+renderHome();
+</script>
+</body>
+</html>
