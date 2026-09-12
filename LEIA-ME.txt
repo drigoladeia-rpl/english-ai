@@ -1,3 +1,2 @@
-English AI Beta 2
-
-Mudanças: pronúncia obrigatória antes de avançar; significado após a fala; etapas alternadas e instruções mais claras; rotina também exige pronúncia aprovada.
+English AI Beta 3
+Aula interativa com formação de frases, pronúncia 85%, exercício variável e conversa por voz com nota.
