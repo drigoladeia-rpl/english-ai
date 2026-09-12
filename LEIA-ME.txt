@@ -1,2 +1,3 @@
-English AI Beta 3
-Aula interativa com formação de frases, pronúncia 85%, exercício variável e conversa por voz com nota.
+Beta 4 — somente as modificações solicitadas sobre a Beta 3. Visual e conteúdo base preservados.
+
+Principais correções: login/perfil, navegação IA/Curso/Perfil, telas de níveis/módulos, nota do exercício e fluxo de teste.
