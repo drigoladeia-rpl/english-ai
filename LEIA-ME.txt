@@ -1,5 +1,3 @@
-ENGLISH AI — BETA 1
+English AI Beta 2
 
-Abra index.html no Chrome para testar. A conta desta Beta é local neste aparelho.
-O microfone precisa de HTTPS (por exemplo, GitHub Pages) e permissão do Chrome.
-O botão Feedback salva o retorno localmente nesta versão.
+Mudanças: pronúncia obrigatória antes de avançar; significado após a fala; etapas alternadas e instruções mais claras; rotina também exige pronúncia aprovada.
