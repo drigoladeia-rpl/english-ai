@@ -1,0 +1,5 @@
+ENGLISH AI — BETA 1
+
+Abra index.html no Chrome para testar. A conta desta Beta é local neste aparelho.
+O microfone precisa de HTTPS (por exemplo, GitHub Pages) e permissão do Chrome.
+O botão Feedback salva o retorno localmente nesta versão.
