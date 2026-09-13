@@ -121,11 +121,89 @@ function openRoutine(){rs=0;renderRoutine()}
 function renderRoutine(){let d=ROUT[rs].map(personalize);document.getElementById('routineBody').innerHTML=`<div class="card"><div class="small">${rs+1}/10 • ${d[0]} ${d[1]}</div><div class="title">${d[2]}</div><div class="audio">🇺🇸 <b>${d[3]}</b><button onclick="speakEN('${d[3]}')">🔊</button></div><div class="hint">💡 ${d[4]}</div></div><div class="card"><div class="small">Sua vez</div><p class="muted">👂 Ouça → 🎤 fale devagar → ✅ só avance quando a pronúncia estiver aprovada.</p><button class="secondary wide" onclick="speakEN('${d[3]}')">🔊 Ouvir novamente</button><button class="mic" onclick="routineMic()">🎤</button><div id="rh" class="muted" style="text-align:center">Toque e fale</div><div id="rf" class="feedback"></div></div><button id="routineNext" class="primary wide nextLocked" onclick="routineNext()">🔒 Fale corretamente para continuar</button>`;show('routine');setTimeout(()=>speakEN(d[3]),300)}
 function routineMic(){let d=ROUT[rs].map(personalize);mic(x=>{let n=score(d[3],x);document.getElementById('rh').textContent='Você disse: '+x+' • '+n+'%';let f=document.getElementById('rf'),b=document.getElementById('routineNext');if(n>=85){f.textContent='🎉 Muito bom! Pronúncia aprovada.';f.className='feedback ok';b.className='primary wide nextReady';b.textContent=rs<9?'Continuar →':'🏆 Finalizar rotina';S.xp+=10;save()}else{f.textContent='💡 Ainda não. Ouça e tente novamente até 85%.';f.className='feedback bad';b.className='primary wide nextLocked';b.textContent='🔒 Fale corretamente para continuar'}})}
 function routineNext(){let b=document.getElementById('routineNext');if(!b.classList.contains('nextReady')){toast('🎤 Acerte a pronúncia para continuar.');return}if(rs<9){rs++;renderRoutine()}else{S.days++;S.xp+=50;save();openAI()}}
-const D=[['Como foi seu dia?','How was your day?','Comece com: My day was...',['good','great','tiring']],['O que você fez hoje?','What did you do today?','Comece com: I...',['worked','studied','ate']],['Você foi de ônibus ou carro?','Did you go by bus or car?','Yes, I did. / No, I didn’t.',['bus','car','home']],['O que você comeu?','What did you eat?','Comece com: I ate...',['sandwich','rice','pizza']],['Como você está agora?','How are you feeling now?','Comece com: I am...',['happy','tired','good']],['Conte uma coisa boa do seu dia.','Tell me one good thing about your day.','Comece com: One good thing was...',['my family','my work','my friend']]];function openAI(){try{const screen=document.getElementById('ai');if(!screen){toast('Tela da IA não encontrada.');return}document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));screen.classList.add('active');document.querySelectorAll('.nav button').forEach(x=>x.classList.remove('sel'));document.getElementById('navAI')?.classList.add('sel');aiStep=0;renderAI(true);window.scrollTo({top:0,behavior:'smooth'});}catch(e){console.error('openAI',e);toast('Não foi possível abrir a conversa com a IA.');}}function renderAI(skipShow){let d=D[Math.min(aiStep,D.length-1)];aiQ=d[1];document.getElementById('aititle').textContent=personalize(d[0]);document.getElementById('aivocab').innerHTML='<div class="small">Palavras que podem ajudar 🔄</div><div class="vocab">'+d[3].map(x=>'<span>'+personalize(x)+'</span>').join('')+'</div>';document.getElementById('aichat').innerHTML='<div class="bubble"><b>🤖 Professora IA</b><div class="pt">🇧🇷 '+personalize(d[0])+'</div><div class="en">🇺🇸 '+personalize(d[1])+' 🔊</div></div><div class="bubble"><div class="pt">Tente responder. Se não souber, peça uma dica.</div></div>';document.getElementById('aihint').style.display='none';document.getElementById('aiinput').value='';if(!skipShow)show('ai');setTimeout(()=>speakEN(d[1]),300)}function aiHint(){let d=D[Math.min(aiStep,D.length-1)];document.getElementById('aihint').textContent='💡 '+d[2];document.getElementById('aihint').style.display='block';speakEN(d[1])}function aiSend(){let i=document.getElementById('aiinput'),t=i.value.trim();if(!t)return;let d=D[Math.min(aiStep,D.length-1)],n=score(d[1],t);document.getElementById('aichat').innerHTML+=`<div class="bubble me">${t}</div>`;if(n>=35){document.getElementById('aichat').innerHTML+=`<div class="bubble"><b>🤖 Muito bom! 👏</b><div class="pt">Você está se comunicando. Vamos continuar.</div><div class="en">🇺🇸 ${d[1]}</div></div>`;S.xp+=15;save();aiStep++;if(aiStep<D.length)setTimeout(renderAI,700);else setTimeout(()=>document.getElementById('aichat').innerHTML+=`<div class="bubble"><b>🎉 Conversa concluída!</b><div class="pt">Você praticou várias situações e algumas frases vão voltar depois.</div></div>`,500)}else{document.getElementById('aichat').innerHTML+=`<div class="bubble"><b>💡 Vamos juntos.</b><div class="pt">Use a dica e tente novamente.</div><div class="en">🇺🇸 ${d[1]}</div></div>`}i.value=''}function aiMic(){mic(x=>{document.getElementById('aiinput').value=x;aiSend()})}
+const D=[['Como foi seu dia?','How was your day?','Comece com: My day was...',['good','great','tiring']],['O que você fez hoje?','What did you do today?','Comece com: I...',['worked','studied','ate']],['Você foi de ônibus ou carro?','Did you go by bus or car?','Yes, I did. / No, I didn’t.',['bus','car','home']],['O que você comeu?','What did you eat?','Comece com: I ate...',['sandwich','rice','pizza']],['Como você está agora?','How are you feeling now?','Comece com: I am...',['happy','tired','good']],['Conte uma coisa boa do seu dia.','Tell me one good thing about your day.','Comece com: One good thing was...',['my family','my work','my friend']]];function openAI(){
+  const screen=document.getElementById('ai');
+  if(!screen){toast('Tela da IA não encontrada.');return false}
+  try{
+    document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));
+    screen.classList.add('active');
+    document.querySelectorAll('.nav button').forEach(x=>x.classList.remove('sel'));
+    const nav=document.getElementById('navAI'); if(nav) nav.classList.add('sel');
+    aiStep=0; aiQ='';
+    renderAI(true);
+    window.scrollTo(0,0);
+    return true;
+  }catch(e){
+    console.error('English AI openAI error:',e);
+    toast('Não foi possível abrir a conversa com a IA.');
+    return false;
+  }
+}
+function renderAI(skipShow){
+  const d=D[Math.min(aiStep,D.length-1)];
+  if(!d || !Array.isArray(d)) throw new Error('Dados da conversa com IA indisponíveis.');
+  aiQ=d[1]||'';
+  const title=document.getElementById('aititle');
+  const vocab=document.getElementById('aivocab');
+  const chat=document.getElementById('aichat');
+  const hint=document.getElementById('aihint');
+  const input=document.getElementById('aiinput');
+  if(!title||!vocab||!chat||!hint||!input) throw new Error('Elementos da tela IA não encontrados.');
+  title.textContent=personalize(d[0]);
+  vocab.innerHTML='<div class="small">Palavras que podem ajudar 🔄</div><div class="vocab">'+(d[3]||[]).map(x=>'<span>'+personalize(x)+'</span>').join('')+'</div>';
+  chat.innerHTML='<div class="bubble"><b>🤖 Professora IA</b><div class="pt">🇧🇷 '+personalize(d[0])+'</div><div class="en">🇺🇸 '+personalize(d[1])+'</div></div><div class="bubble"><div class="pt">Tente responder em inglês. Se não souber, peça uma dica.</div></div>';
+  hint.style.display='none'; input.value='';
+  if(!skipShow) show('ai');
+  setTimeout(()=>{try{speakEN(d[1])}catch(e){console.warn('AI audio:',e)}},350);
+}
+function aiHint(){
+  const d=D[Math.min(aiStep,D.length-1)];
+  const h=document.getElementById('aihint');
+  if(!d||!h)return;
+  h.textContent='💡 '+d[2]; h.style.display='block';
+  try{speakEN(d[1])}catch(e){}
+}
+function aiSend(){
+  const input=document.getElementById('aiinput'),chat=document.getElementById('aichat');
+  if(!input||!chat)return;
+  const t=input.value.trim(); if(!t){toast('Digite ou fale uma resposta primeiro.');return}
+  const d=D[Math.min(aiStep,D.length-1)];
+  const n=score(d[1],t);
+  chat.innerHTML+='<div class="bubble me">'+t.replace(/[<>&]/g,m=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[m]))+'</div>';
+  if(n>=35){
+    chat.innerHTML+='<div class="bubble"><b>🤖 Muito bom! 👏</b><div class="pt">Você está se comunicando. Vamos continuar.</div><div class="en">🇺🇸 '+personalize(d[1])+'</div></div>';
+    S.xp+=15; save(); aiStep++;
+    if(aiStep<D.length){
+      setTimeout(()=>renderAI(false),700);
+    }else{
+      chat.innerHTML+='<div class="bubble"><b>🎉 Conversa concluída!</b><div class="pt">Você praticou várias situações e algumas frases vão voltar depois.</div></div>';
+    }
+  }else{
+    chat.innerHTML+='<div class="bubble"><b>💡 Vamos juntos.</b><div class="pt">Sua resposta ainda precisa de um pouco de ajuste. Use a dica ou tente novamente.</div><div class="en">🇺🇸 '+personalize(d[1])+'</div></div>';
+  }
+  input.value='';
+}
+function aiMic(){
+  const input=document.getElementById('aiinput');
+  if(!input)return;
+  mic(x=>{input.value=x;aiSend()});
+}
+
 function openExercises(){let q=[['O que significa “thank you”?','Obrigado(a)','Por favor'],['Complete: My ___ is Rodrigo.','name','water'],['Como dizer “Bom dia”?','Good morning','Good night'],['Complete: I want some ___.','water','name'],['Como perguntar “Como você está?”','How are you?','Where are you?']];q=q.map(x=>x.map(personalize));document.getElementById('exerciseBody').innerHTML=q.map((x,i)=>`<div class="card"><div class="small">Exercício ${i+1}/5</div><p><b>${x[0]}</b></p><button class="choice" onclick="ex(this,true)">${x[1]}</button><button class="choice" onclick="ex(this,false)">${x[2]}</button><div class="feedback"></div></div>`).join('');show('exercises')}function ex(el,ok){el.classList.add(ok?'correct':'wrong');el.parentElement.querySelectorAll('.choice').forEach(x=>x.disabled=true);let f=el.parentElement.querySelector('.feedback');f.textContent=ok?'✅ Correto!':'❌ Revise e tente novamente.';f.className='feedback '+(ok?'ok':'bad');if(ok){S.xp+=5;save()}}
 let ti=0,ts=0;const T=[['I am a student.','Eu sou um estudante.','Eu tenho um estudante.'],['Good morning!','Bom dia!','Boa noite!'],['Thank you.','Obrigado(a).','Por favor.'],['I eat a sandwich.','Eu como um sanduíche.','Eu quero um café.'],['Where is the bus?','Onde está o ônibus?','Onde está a casa?']];function openTest(){ti=0;ts=0;renderTest()}function renderTest(){if(ti>=T.length){document.getElementById('testBody').innerHTML=`<div class="card hero"><div class="small">Resultado</div><div class="title">🎉 Seu ponto de partida: ${ts>=5?'A2':'A1'}</div><p>Você acertou ${ts}/${T.length}. O curso pode ser ajustado pela sua evolução.</p><button class="primary wide" onclick="selectLevel('${ts>=5?'A2':'A1'}')">Começar</button></div>`;return}let q=T[ti];document.getElementById('testBody').innerHTML=`<div class="card"><div class="small">Questão ${ti+1}/${T.length}</div><div class="title">${q[0]}</div><p class="muted">Escolha a tradução correta.</p><button class="choice" onclick="ta(this,true)">${q[1]}</button><button class="choice" onclick="ta(this,false)">${q[2]}</button></div>`;show('test')}function ta(el,ok){if(ok)ts++;el.classList.add(ok?'correct':'wrong');document.querySelectorAll('.choice').forEach(x=>x.disabled=true);setTimeout(()=>{ti++;renderTest()},450)}
 function openProgress(){document.getElementById('progressBody').innerHTML=`<div class="stat"><span>Nível</span><b>${currentLevel} — ${LEVELS[currentLevel][0]}</b></div><div class="stat"><span>XP</span><b>${S.xp}</b></div><div class="stat"><span>Lições</span><b>${S.done}/60</b></div><div class="stat"><span>Dias</span><b>${S.days}</b></div><div style="margin-top:12px"><b>Leitura</b><div class="bar2"><i style="width:${Math.min(100,10+S.done*2)}%"></i></div></div><div style="margin-top:10px"><b>Conversação</b><div class="bar2"><i style="width:${Math.min(100,5+S.done*2)}%"></i></div></div><div style="margin-top:10px"><b>Pronúncia</b><div class="bar2"><i style="width:${Math.min(100,8+S.done*1.8)}%"></i></div></div><button class="danger wide" style="margin-top:16px" onclick="resetApp()">↻ Reiniciar progresso</button>`;show('progress')}function resetApp(){if(confirm('Reiniciar todo o progresso?')){S={level:'A1',done:0,xp:0,days:1};save();renderHome();openProgress()}}
 renderHome();renderLevels();try{const u=JSON.parse(localStorage.getItem('englishAIBetaUser')||'null');if(u&&u.name&&u.email){document.getElementById('loginGate').style.display='none';show('home')}else{document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));}}catch(e){document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));}
+// Proteção extra: os controles da IA também recebem listeners diretos.
+(function initAIControls(){
+  try{
+    const bHint=document.querySelector('#ai button.ghost');
+    const bSend=document.querySelector('#ai button.primary');
+    const bMic=document.getElementById('aimic');
+    if(bHint){bHint.type='button';bHint.onclick=aiHint}
+    if(bSend){bSend.type='button';bSend.onclick=aiSend}
+    if(bMic){bMic.type='button';bMic.onclick=aiMic}
+  }catch(e){console.warn('AI controls:',e)}
+})();
 </script><button class="feedbackBtn" onclick="openFeedback()">💬 Feedback</button><div class="modal" id="feedbackModal"><div class="modalCard"><h3>💬 Como está o English AI?</h3><p class="muted">Seu feedback será preparado diretamente no WhatsApp do responsável pelo teste. Ele não será salvo neste aparelho.</p><textarea id="feedbackText" placeholder="Conte o que gostou, o que ficou confuso ou o que não funcionou..."></textarea><div class="modalActions"><button class="cancel" onclick="closeFeedback()">Fechar</button><button class="send" onclick="saveFeedback()">Enviar feedback</button></div></div></div>
 <script>
 function openProfile(){const u=JSON.parse(localStorage.getItem('englishAIBetaUser')||'{}');document.getElementById('profileName').textContent=u.name||'Aluno';document.getElementById('profileEmail').textContent=u.email||'';document.getElementById('profileLevel').textContent=currentLevel;document.getElementById('profileXP').textContent=S.xp;document.getElementById('profileDone').textContent=S.done;show('profile')}
