@@ -9,7 +9,7 @@
 <section id="levels" class="screen"><div class="card"><div class="small">Curso completo</div><div class="title">Escolha seu nível</div><p class="muted">Do zero à conversação avançada.</p><div id="levelsList"></div></div></section>
 <section id="course" class="screen"><div class="card"><div class="lessonhead"><button class="back" onclick="show('home')">←</button><div><div class="small" id="ctag"></div><div class="title" id="ctitle"></div></div></div><p class="muted" id="cdesc"></p><div class="bar" style="background:#e5edf8"><i id="cbar" style="background:#126cf3;width:12%"></i></div></div><div class="card"><div class="small">Módulos</div><div id="mods"></div></div></section>
 <section id="lesson" class="screen"><div class="card"><div class="lessonhead"><button class="back" onclick="openCourse()">←</button><div><div class="small" id="ltag"></div><div class="title" id="ltitle"></div></div><span class="right" id="lno"></span></div><p class="muted" id="ldesc"></p></div><div id="lessonBody"></div></section>
-<section id="ai" class="screen"><div class="card"><div class="small">🤖 Professora IA • Conversa guiada</div><div class="title" id="aititle"></div><p class="muted">A IA pergunta em português, mostra e fala o inglês, ajuda quando você trava e vai retirando a ajuda conforme evolui.</p></div><div class="card" id="aivocab"></div><div class="card chat" id="aichat"></div><div class="card"><button class="secondary wide" onclick="speakEN(aiQ)">🔊 Ouvir inglês novamente</button><button class="mic" id="aimic" onclick="aiMic()">🎤</button><div id="aihint" class="hint" style="display:none"></div><input class="input" id="aiinput" placeholder="Fale ou digite em inglês..."><div class="row" style="margin-top:8px"><button class="ghost" onclick="aiHint()">💡 Dica</button><button class="primary" onclick="aiSend()">Enviar</button></div></div></section>
+<section id="ai" class="screen"><div class="card"><div class="small">🤖 Professora IA • Conversa guiada</div><div class="title" id="aititle"></div><p class="muted">A IA pergunta em português, mostra e fala o inglês, ajuda quando você trava e vai retirando a ajuda conforme evolui.</p></div><div class="card" id="aivocab"></div><div class="card chat" id="aichat"></div><div class="card"><button class="secondary wide" onclick="speakEN(aiQ)">🔊 Ouvir inglês novamente</button><button class="mic" id="aimic" onclick="aiMic()">🎤</button><div id="aihint" class="hint" style="display:none"></div><input class="input" id="aiinput" placeholder="Digite em inglês..."><div class="row" style="margin-top:8px"><button class="ghost" onclick="aiHint()">💡 Dica</button><button class="primary" onclick="aiSend()">Enviar</button></div></div></section>
 <section id="routine" class="screen"><div class="card"><div class="small">Rotina cotidiana</div><div class="title">🌅 Um dia em inglês</div><p class="muted">A mesma palavra reaparece em novos contextos para criar memória.</p></div><div id="routineBody"></div></section>
 <section id="exercises" class="screen"><div class="card"><div class="small">Exercícios</div><div class="title">🧠 Pratique e revise</div><p class="muted">Vocabulário, tradução, construção e repetição.</p></div><div id="exerciseBody"></div></section>
 <section id="test" class="screen"><div class="card"><div class="small">Teste de nível</div><div class="title">📊 Descubra seu nível</div><p class="muted">Uma avaliação rápida para orientar seu começo.</p></div><div id="testBody"></div></section>
@@ -149,8 +149,8 @@ function renderAI(skipShow){
   const input=document.getElementById('aiinput');
   if(!title||!vocab||!chat||!hint||!input) throw new Error('Elementos da tela IA não encontrados.');
   title.textContent=personalize(d[0]);
-  vocab.innerHTML='<div class="small">Palavras que podem ajudar 🔄</div><div class="vocab">'+(d[3]||[]).map(x=>'<span>'+personalize(x)+'</span>').join('')+'</div>';
-  chat.innerHTML='<div class="bubble"><b>🤖 Professora IA</b><div class="pt">🇧🇷 '+personalize(d[0])+'</div><div class="en">🇺🇸 '+personalize(d[1])+'</div></div><div class="bubble"><div class="pt">Tente responder em inglês. Se não souber, peça uma dica.</div></div>';
+  vocab.innerHTML='<div class="small">Palavras para ajudar</div><div class="vocab">'+(d[3]||[]).map(x=>'<span>'+personalize(x)+'</span>').join('')+'</div>';
+  chat.innerHTML='<div class="bubble"><b>🤖 Professora IA</b><div class="pt">🇧🇷 '+personalize(d[0])+'</div><div class="en">🇺🇸 '+personalize(d[1])+'</div></div><div class="bubble"><div class="pt">Vamos por partes. Responda em inglês. Se precisar, toque em Dica.</div></div>';
   hint.style.display='none'; input.value='';
   if(!skipShow) show('ai');
   setTimeout(()=>{try{speakEN(d[1])}catch(e){console.warn('AI audio:',e)}},350);
@@ -178,15 +178,49 @@ function responsePT(t){
   const word={my:'meu',day:'dia',was:'foi',good:'bom',great:'ótimo',awesome:'incrível',tiring:'cansativo',i:'eu',worked:'trabalhei',studied:'estudei',ate:'comi',bus:'ônibus',car:'carro',home:'casa',sandwich:'sanduíche',rice:'arroz',pizza:'pizza',am:'estou',happy:'feliz',tired:'cansado(a)',family:'família',work:'trabalho',friend:'amigo(a)',one:'uma',thing:'coisa'};
   const parts=n.split(' ').map(x=>word[x]||x); return parts.join(' ');
 }
+function responseEN(t){
+  const n=norm(t);
+  const exact={
+    'meu dia foi bom':'My day was good.','meu dia foi ótimo':'My day was great.','meu dia foi otimo':'My day was great.',
+    'meu dia foi cansativo':'My day was tiring.','meu dia foi incrível':'My day was awesome.','meu dia foi incrivel':'My day was awesome.',
+    'meu dia foi tranquilo':'My day was okay.','eu trabalhei':'I worked.','eu estudei':'I studied.','eu comi':'I ate.',
+    'eu fui de ônibus':'I went by bus.','eu fui de onibus':'I went by bus.','eu fui de carro':'I went by car.',
+    'eu comi um sanduíche':'I ate a sandwich.','eu comi um sanduiche':'I ate a sandwich.','eu comi arroz':'I ate rice.','eu comi pizza':'I ate pizza.',
+    'eu estou feliz':'I am happy.','eu estou cansado':'I am tired.','eu estou cansada':'I am tired.','eu estou bem':'I am good.',
+    'uma coisa boa foi minha família':'One good thing was my family.','uma coisa boa foi minha familia':'One good thing was my family.',
+    'uma coisa boa foi meu trabalho':'One good thing was my work.','uma coisa boa foi meu amigo':'One good thing was my friend.','uma coisa boa foi minha amiga':'One good thing was my friend.'
+  };
+  if(exact[n])return exact[n];
+  return '';
+}
 function aiSend(){
   const input=document.getElementById('aiinput'),chat=document.getElementById('aichat');
   if(!input||!chat)return;
   const t=input.value.trim(); if(!t){toast('Digite ou fale uma resposta primeiro.');return}
   const d=D[Math.min(aiStep,D.length-1)];
-  const n=score(d[1],t);
-  const safeT=t.replace(/[<>&]/g,m=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[m])); const userBubble=isAdvancedMode()?'<div class="bubble me">🇺🇸 '+safeT+'</div>':'<div class="bubble me">🇺🇸 '+safeT+'<div class="pt">🇧🇷 '+responsePT(t)+'</div></div>'; chat.innerHTML+=userBubble;
-  if(n>=35){
-    chat.innerHTML+='<div class="bubble"><b>🤖 Muito bom! 👏</b><div class="pt">Você está se comunicando. Vamos continuar.</div><div class="en">🇺🇸 '+personalize(d[1])+'</div></div>';
+  const translatedEN=responseEN(t);
+  const englishForScore=translatedEN||t;
+  const answerWords=(d[3]||[]).map(norm).filter(Boolean);
+  const heardWords=norm(englishForScore).split(' ').filter(Boolean);
+  const hits=answerWords.filter(w=>heardWords.includes(w)).length;
+  const n=Math.min(100,Math.round((hits/Math.max(1,answerWords.length))*100)+(heardWords.length>3?10:0));
+  const safeT=t.replace(/[<>&]/g,m=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[m]));
+  const ptMeaning=responsePT(t);
+  const enMeaning=responseEN(t);
+  let userBubble;
+  if(isAdvancedMode()){
+    userBubble='<div class="bubble me">🇺🇸 '+safeT+'</div>';
+  }else if(enMeaning){
+    userBubble='<div class="bubble me">🇧🇷 '+safeT+'<div class="en">🇺🇸 '+enMeaning+'</div></div>';
+  }else{
+    userBubble='<div class="bubble me">🇺🇸 '+safeT+(ptMeaning?'<div class="pt">🇧🇷 '+ptMeaning+'</div>':'')+'</div>';
+  }
+  chat.innerHTML+=userBubble;
+  if(translatedEN){
+    chat.innerHTML+='<div class="bubble"><b>👏 Muito bem!</b><div class="pt">Você deu a ideia em português. Agora vamos falar em inglês.</div><div class="en">🇺🇸 '+personalize(translatedEN)+'</div><div class="pt">💡 Dica: repita a frase em inglês.</div></div>';
+    try{speakEN(translatedEN)}catch(e){}
+  }else if(n>=35){
+    chat.innerHTML+='<div class="bubble"><b>🤖 Muito bom! 👏</b><div class="pt">Perfeito! Você respondeu em inglês. Vamos continuar.</div><div class="en">🇺🇸 '+personalize(d[1])+'</div></div>';
     S.xp+=15; save(); aiStep++;
     if(aiStep<D.length){
       setTimeout(()=>renderAI(false),700);
