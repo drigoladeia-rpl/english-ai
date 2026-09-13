@@ -162,13 +162,29 @@ function aiHint(){
   h.textContent='💡 '+d[2]; h.style.display='block';
   try{speakEN(d[1])}catch(e){}
 }
+function isAdvancedMode(){return ['B2','C1','C2'].includes(currentLevel)}
+function responsePT(t){
+  const n=norm(t);
+  const exact={
+    'my day was good':'Meu dia foi bom.','my day was great':'Meu dia foi ótimo.','my day was tiring':'Meu dia foi cansativo.',
+    'my day was awesome':'Meu dia foi incrível.','my day was okay':'Meu dia foi tranquilo.',
+    'i worked':'Eu trabalhei.','i studied':'Eu estudei.','i ate':'Eu comi.',
+    'i went by bus':'Eu fui de ônibus.','i went by car':'Eu fui de carro.',
+    'i ate a sandwich':'Eu comi um sanduíche.','i ate rice':'Eu comi arroz.','i ate pizza':'Eu comi pizza.',
+    'i am happy':'Eu estou feliz.','i am tired':'Eu estou cansado(a).','i am good':'Eu estou bem.',
+    'one good thing was my family':'Uma coisa boa foi minha família.','one good thing was my work':'Uma coisa boa foi meu trabalho.','one good thing was my friend':'Uma coisa boa foi meu amigo/minha amiga.'
+  };
+  if(exact[n])return exact[n];
+  const word={my:'meu',day:'dia',was:'foi',good:'bom',great:'ótimo',awesome:'incrível',tiring:'cansativo',i:'eu',worked:'trabalhei',studied:'estudei',ate:'comi',bus:'ônibus',car:'carro',home:'casa',sandwich:'sanduíche',rice:'arroz',pizza:'pizza',am:'estou',happy:'feliz',tired:'cansado(a)',family:'família',work:'trabalho',friend:'amigo(a)',one:'uma',thing:'coisa'};
+  const parts=n.split(' ').map(x=>word[x]||x); return parts.join(' ');
+}
 function aiSend(){
   const input=document.getElementById('aiinput'),chat=document.getElementById('aichat');
   if(!input||!chat)return;
   const t=input.value.trim(); if(!t){toast('Digite ou fale uma resposta primeiro.');return}
   const d=D[Math.min(aiStep,D.length-1)];
   const n=score(d[1],t);
-  chat.innerHTML+='<div class="bubble me">'+t.replace(/[<>&]/g,m=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[m]))+'</div>';
+  const safeT=t.replace(/[<>&]/g,m=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[m])); const userBubble=isAdvancedMode()?'<div class="bubble me">🇺🇸 '+safeT+'</div>':'<div class="bubble me">🇺🇸 '+safeT+'<div class="pt">🇧🇷 '+responsePT(t)+'</div></div>'; chat.innerHTML+=userBubble;
   if(n>=35){
     chat.innerHTML+='<div class="bubble"><b>🤖 Muito bom! 👏</b><div class="pt">Você está se comunicando. Vamos continuar.</div><div class="en">🇺🇸 '+personalize(d[1])+'</div></div>';
     S.xp+=15; save(); aiStep++;
